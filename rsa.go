@@ -14,7 +14,7 @@ const PrivateKeyName = "private.pem"
 //创建公私钥
 func GetKeys() {
 	//生成私钥
-	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, _ := rsa.GenerateKey(rand.Reader, 10240)
 	x509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
 
 	fp, _ := os.Create(PrivateKeyName)
@@ -67,7 +67,6 @@ func RSAEncryptInput(publicKey, msg []byte) []byte {
 
 	pub, _ := x509.ParsePKIXPublicKey(block.Bytes)
 	cipherText, _ := rsa.EncryptPKCS1v15(rand.Reader, pub.(*rsa.PublicKey), msg)
-
 	return cipherText
 }
 
