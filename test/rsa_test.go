@@ -158,3 +158,9 @@ func Test_GetFee(t *testing.T) {
 	fmt.Println(err)
 	fmt.Println(string(rsa.RSAEncryptInput([]byte(bk), b)))
 }
+
+func Test_return(t *testing.T) {
+	s1, s2 := rsa.GetKeysToMemory()
+	fmt.Println(string(s1))
+	fmt.Println(string(s2))
+}

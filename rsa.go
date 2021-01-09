@@ -11,10 +11,12 @@ import (
 const PublicKeyName = "PublicKey.pem"
 const PrivateKeyName = "private.pem"
 
+var Bits int = 3084
+
 //创建公私钥
 func GetKeys() {
 	//生成私钥
-	privateKey, _ := rsa.GenerateKey(rand.Reader, 10240)
+	privateKey, _ := rsa.GenerateKey(rand.Reader, Bits)
 	x509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
 
 	fp, _ := os.Create(PrivateKeyName)
@@ -38,6 +40,29 @@ func GetKeys() {
 	defer file.Close()
 
 	pem.Encode(file, &pemPublicKey)
+}
+
+func GetKeysToMemory() ([]byte, []byte) {
+	//生成私钥
+	privateKey, _ := rsa.GenerateKey(rand.Reader, Bits)
+	x509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
+
+	pemBlock := pem.Block{
+		Type:  "privateKey",
+		Bytes: x509PrivateKey,
+	}
+	pk := pem.EncodeToMemory(&pemBlock)
+
+	//生成公钥
+	publicKey := privateKey.PublicKey
+	x509PublicKey, _ := x509.MarshalPKIXPublicKey(&publicKey)
+	pemPublicKey := pem.Block{
+		Type:  "PublicKey",
+		Bytes: x509PublicKey,
+	}
+	pubk := pem.EncodeToMemory(&pemPublicKey)
+
+	return pk, pubk
 }
 
 //使用公钥进行加密
