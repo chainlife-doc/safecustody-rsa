@@ -93,7 +93,9 @@ func Test_Rsa2(t *testing.T) {
 
 //获取公私钥
 func Test_GetKeys(t *testing.T) {
-	rsa.GetKeys()
+	keys := rsa.GetKeys()
+	fmt.Println(string(keys.Pk))
+	fmt.Println(string(keys.Pubk))
 }
 
 func Test_GetFee(t *testing.T) {
@@ -157,10 +159,4 @@ func Test_GetFee(t *testing.T) {
 	b, err := json.Marshal(jrpcParams)
 	fmt.Println(err)
 	fmt.Println(string(rsa.RSAEncryptInput([]byte(bk), b)))
-}
-
-func Test_return(t *testing.T) {
-	s1, s2 := rsa.GetKeysToMemory()
-	fmt.Println(string(s1))
-	fmt.Println(string(s2))
 }

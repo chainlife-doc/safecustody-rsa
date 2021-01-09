@@ -13,36 +13,43 @@ const PrivateKeyName = "private.pem"
 
 var Bits int = 3084
 
-//创建公私钥
-func GetKeys() {
-	//生成私钥
-	privateKey, _ := rsa.GenerateKey(rand.Reader, Bits)
-	x509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
-
-	fp, _ := os.Create(PrivateKeyName)
-	defer fp.Close()
-
-	pemBlock := pem.Block{
-		Type:  "privateKey",
-		Bytes: x509PrivateKey,
-	}
-	pem.Encode(fp, &pemBlock)
-
-	//生成公钥
-	publicKey := privateKey.PublicKey
-	x509PublicKey, _ := x509.MarshalPKIXPublicKey(&publicKey)
-	pemPublicKey := pem.Block{
-		Type:  "PublicKey",
-		Bytes: x509PublicKey,
-	}
-
-	file, _ := os.Create(PublicKeyName)
-	defer file.Close()
-
-	pem.Encode(file, &pemPublicKey)
+type RsaKeys struct {
+	Pubk []byte
+	Pk   []byte
 }
 
-func GetKeysToMemory() ([]byte, []byte) {
+//创建公私钥
+func GetKeys() RsaKeys {
+
+	block := CreateBlock()
+
+	fp, err := os.Create(PrivateKeyName)
+	if err != nil {
+		panic(err)
+	}
+	defer fp.Close()
+	pem.Encode(fp, &block.Pk)
+
+	file, err := os.Create(PublicKeyName)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	pem.Encode(file, &block.Pubk)
+
+	return RsaKeys{
+		Pubk: pem.EncodeToMemory(&block.Pubk),
+		Pk:   pem.EncodeToMemory(&block.Pk),
+	}
+}
+
+type RsaBlock struct {
+	Pubk pem.Block
+	Pk   pem.Block
+}
+
+func CreateBlock() RsaBlock {
 	//生成私钥
 	privateKey, _ := rsa.GenerateKey(rand.Reader, Bits)
 	x509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
@@ -51,7 +58,6 @@ func GetKeysToMemory() ([]byte, []byte) {
 		Type:  "privateKey",
 		Bytes: x509PrivateKey,
 	}
-	pk := pem.EncodeToMemory(&pemBlock)
 
 	//生成公钥
 	publicKey := privateKey.PublicKey
@@ -60,9 +66,11 @@ func GetKeysToMemory() ([]byte, []byte) {
 		Type:  "PublicKey",
 		Bytes: x509PublicKey,
 	}
-	pubk := pem.EncodeToMemory(&pemPublicKey)
 
-	return pk, pubk
+	return RsaBlock{
+		Pubk: pemPublicKey,
+		Pk:   pemBlock,
+	}
 }
 
 //使用公钥进行加密
